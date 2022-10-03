@@ -34,6 +34,17 @@ namespace MockingUnitTestsDemoApp.Tests.Services
             players.Should().AllBeAssignableTo<Player>().And.NotBeNull();
         }
 
+        [Fact]
+        public void GetForLeague_InserirIdNaoValido_RetornaListaVaziaDeJogadores()
+        {
+            var id = 4;
+            _mockLeagueRepo.Setup(mock => mock.IsValid(id)).Returns(false);
+
+            var players = _subject.GetForLeague(It.IsAny<int>());
+
+            players.Should().AllBeAssignableTo<Player>().And.BeEmpty();
+        }
+
         private List<Player> GetFakePlayers()
         {
             return new List<Player>
