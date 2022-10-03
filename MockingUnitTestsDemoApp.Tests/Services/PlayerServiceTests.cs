@@ -22,32 +22,63 @@ namespace MockingUnitTestsDemoApp.Tests.Services
         }
 
         [Fact]
-        public void GetForLeague_HappyDay_ReturnPlayerList()
+        public void GetForLeague_HappyDay_ReturnPlayerListNotEmpty()
         {
-            var id = 1;
-            _mockLeagueRepo.Setup(mock => mock.IsValid(id)).Returns(true);
-            _mockTeamRepo.Setup(mock => mock.GetForLeague(id)).Returns(GetFakeTeam());
+            //Arrange
+            _mockLeagueRepo.Setup(mock => mock.IsValid(It.IsAny<int>())).Returns(true);
+            _mockTeamRepo.Setup(mock => mock.GetForLeague(It.IsAny<int>())).Returns(GetFakeTeams());
             _mockPlayerRepo.Setup(mock => mock.GetForTeam(It.IsAny<int>())).Returns(GetFakePlayers());
             
-            var players = _subject.GetForLeague(It.IsAny<int>());
+            //Act
+            var playersResult = _subject.GetForLeague(It.IsAny<int>());
 
-            players.Should().AllBeAssignableTo<Player>().And.NotBeNull();
+            //Assert
+            playersResult.Should()
+                .NotBeEmpty();
+
+            VerifyLeagueIsValidTimeOnce();
+            _mockLeagueRepo.Verify(x => x.IsValid(It.IsAny<int>()), Times.Once);
+            _mockTeamRepo.Verify(x => x.GetForLeague(It.IsAny<int>()), Times.Once);
+            _mockPlayerRepo.Verify(x => x.GetForTeam(It.IsAny<int>()), Times.Exactly(GetFakeTeams().Count));
         }
 
         [Fact]
-        public void GetForLeague_InsertInvalidId_ReturnEmptyPlayerList()
+        public void GetForLeague_InvalidLeagueId_EmptyPlayerList()
         {
-            var id = 4;
-            _mockLeagueRepo.Setup(mock => mock.IsValid(id)).Returns(false);
+            //Arrange
+            _mockLeagueRepo.Setup(mock => mock.IsValid(It.IsAny<int>())).Returns(false);
 
-            var players = _subject.GetForLeague(It.IsAny<int>());
+            //Act
+            var playersResult = _subject.GetForLeague(It.IsAny<int>());
 
-            players.Should().AllBeAssignableTo<Player>().And.BeEmpty();
+            //Assert
+            playersResult.Should()
+                .BeEmpty();
+            VerifyLeagueIsValidTimeOnce();
+            _mockTeamRepo.Verify(x => x.GetForLeague(It.IsAny<int>()), Times.Never);
+            _mockPlayerRepo.Verify(x => x.GetForTeam(It.IsAny<int>()), Times.Never);
         }
 
-        private List<Player> GetFakePlayers()
+        [Fact]
+        public void GetForLeague_LeagueWithoutTeams_EmptyListPlayers()
         {
-            return new List<Player>
+            //Arrange
+            _mockLeagueRepo.Setup(mock => mock.IsValid(It.IsAny<int>())).Returns(true);
+            _mockTeamRepo.Setup(mock => mock.GetForLeague(It.IsAny<int>())).Returns(GetFakeTeams());
+
+            //Act
+            var playersResult = _subject.GetForLeague(It.IsAny<int>());
+
+            //Assert
+            playersResult.Should()
+                .BeEmpty();
+            VerifyLeagueIsValidTimeOnce();
+            _mockTeamRepo.Verify(x => x.GetForLeague(It.IsAny<int>()), Times.Once);
+            _mockPlayerRepo.Verify(x => x.GetForTeam(It.IsAny<int>()), Times.Never);
+        }
+
+        private List<Player> GetFakePlayers() 
+            => new()
             {
                 new Player {ID = 1, FirstName = "Menino", LastName = "Ney", 
                     DateOfBirth = DateTime.UtcNow, TeamID = 1},
@@ -56,16 +87,18 @@ namespace MockingUnitTestsDemoApp.Tests.Services
                 new Player {ID = 3, FirstName = "Cristiano", LastName = "Ronaldo", 
                     DateOfBirth = DateTime.UtcNow, TeamID = 3}
             };
-        }
 
-        private List<Team> GetFakeTeam()
-        {
-            return new List<Team>
+        private List<Team> GetFakeTeams() 
+            => new ()
             {
                 new Team {ID = 1, Name = "PSG", LeagueID = 1, FoundingDate = DateTime.UtcNow},
                 new Team {ID = 2, Name = "MSC", LeagueID = 2, FoundingDate = DateTime.UtcNow},
                 new Team {ID = 3, Name = "LIV", LeagueID = 3, FoundingDate = DateTime.UtcNow}
             };
+
+        private void VerifyLeagueIsValidTimeOnce()
+        {
+            _mockLeagueRepo.Verify(x => x.IsValid(It.IsAny<int>()), Times.Once);
         }
     }
 }
