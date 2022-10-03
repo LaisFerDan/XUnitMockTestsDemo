@@ -22,7 +22,7 @@ namespace MockingUnitTestsDemoApp.Tests.Services
         }
 
         [Fact]
-        public void GetForLeague_HappyDay_RetornaTodosComoJogadores()
+        public void GetForLeague_HappyDay_ReturnPlayerList()
         {
             var id = 1;
             _mockLeagueRepo.Setup(mock => mock.IsValid(id)).Returns(true);
@@ -35,7 +35,7 @@ namespace MockingUnitTestsDemoApp.Tests.Services
         }
 
         [Fact]
-        public void GetForLeague_InserirIdNaoValido_RetornaListaVaziaDeJogadores()
+        public void GetForLeague_InsertInvalidId_ReturnEmptyPlayerList()
         {
             var id = 4;
             _mockLeagueRepo.Setup(mock => mock.IsValid(id)).Returns(false);
