@@ -27,9 +27,9 @@ namespace MockingUnitTestsDemoApp.Tests.Services
             var id = 1;
             _mockLeagueRepo.Setup(mock => mock.IsValid(id)).Returns(true);
             _mockTeamRepo.Setup(mock => mock.GetForLeague(id)).Returns(GetFakeTeam());
-            _mockPlayerRepo.Setup(mock => mock.GetForTeam(id)).Returns(GetFakePlayers());
+            _mockPlayerRepo.Setup(mock => mock.GetForTeam(It.IsAny<int>())).Returns(GetFakePlayers());
             
-            var players = _subject.GetForLeague(id);
+            var players = _subject.GetForLeague(It.IsAny<int>());
 
             players.Should().AllBeAssignableTo<Player>().And.NotBeNull();
         }
@@ -41,9 +41,9 @@ namespace MockingUnitTestsDemoApp.Tests.Services
                 new Player {ID = 1, FirstName = "Menino", LastName = "Ney", 
                     DateOfBirth = DateTime.UtcNow, TeamID = 1},
                 new Player {ID = 2, FirstName = "Alguma Coisa", LastName = "Messi", 
-                    DateOfBirth = DateTime.UtcNow, TeamID = 1},
+                    DateOfBirth = DateTime.UtcNow, TeamID = 2},
                 new Player {ID = 3, FirstName = "Cristiano", LastName = "Ronaldo", 
-                    DateOfBirth = DateTime.UtcNow, TeamID = 1}
+                    DateOfBirth = DateTime.UtcNow, TeamID = 3}
             };
         }
 
@@ -51,7 +51,9 @@ namespace MockingUnitTestsDemoApp.Tests.Services
         {
             return new List<Team>
             {
-                new Team {ID = 1, Name = "PSG", LeagueID = 1, FoundingDate = DateTime.UtcNow}
+                new Team {ID = 1, Name = "PSG", LeagueID = 1, FoundingDate = DateTime.UtcNow},
+                new Team {ID = 2, Name = "MSC", LeagueID = 2, FoundingDate = DateTime.UtcNow},
+                new Team {ID = 3, Name = "LIV", LeagueID = 3, FoundingDate = DateTime.UtcNow}
             };
         }
     }
